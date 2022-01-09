@@ -1,0 +1,517 @@
+---
+title: "IE 5374 - Sec 1 - Group 14 - Project 1 - Task 1"
+output: pdf_document
+---
+```{r, Libraries}
+library(plotly)
+library(NbClust)
+library(factoextra)
+library(ggplot2)
+library(ClusterR)
+```
+
+
+
+Parititon data set into pre defined (k) distinct groups or clusters where each data point belongs to only one cluster.
+```{r, Data1}
+#Use K-means clustering methods to generate clusters
+
+fviz_nbclust(Data1[,2:4], kmeans, method = "silhouette") #determine optimal number of clusters and plot of the number of clusters vs. the total within sum of square
+
+Data1_km <- Data1[2:4] #selecting first three columns
+km_Data1 <- kmeans(Data1[,2:4], 6) #specify number of cluster K
+attributes(km_Data1) #Kmeans attributes
+km_Data1$cluster #cluster values
+km_Data1$centers #centroids
+Data1_km$Class <- km_Data1$cluster #kmeans cluster analysis
+```
+
+Takes each observation as a separate cluster and reiterates till it identifies two observations that are closest to each other and merge the two into a cluster.
+```{r, Data1}
+#Use hierarchical clustering methods to generate clusters
+Data1_hr <- Data1[2:4]
+Data1_hr_dist <- dist(Data1_hr,method= "euclidean") #distance
+
+Data1_hr_clust <- hclust(Data1_hr_dist, method = "complete") #Hierarchical
+
+plot(Data1_hr_clust, cex =0.5)
+rect.hclust(Data1_hr_clust, k=6, border = 2:7) #Plot cluster dendogram
+Data1_km$Hr_Data1_clusters <- cutree(Data1_hr_clust, k=6)
+```
+
+Compare the results of a cluster analysis to provided class. It is mainly used to select the right clustering algorithm for a specific data set. External validation ranges between 0-1.
+```{r, Data1}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data1$Class,Data1_km$Hr_Data1_clusters,method = "rand_index")
+```
+
+```{r, Data1}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data1_Plot_True <- plot_ly(Data1,x=~X1,y=~X2,z=~X3, color = ~as.factor(Class))
+
+Data1_Plot_True
+```
+
+```{r, Data1}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data1_Plot_km <- plot_ly(Data1,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(km_Data1$cluster))
+Data1_Plot_km <- Data1_Plot_km %>% add_markers()
+
+Data1_Plot_km
+```
+
+```{r, Data1}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data1_clusters <- cutree(Data1_hr_clust, k=6)
+Data1_Plot_hr <- plot_ly(Data1_hr,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(Hr_Data1_clusters))
+
+Data1_Plot_hr
+```
+Note: As per observation, for the given data set Hierarchial clustering gives an optimum solution over rand_index.  
+
+
+
+
+```{r, Data2}
+#Use K-means clustering methods to generate clusters
+Data2 <- na.omit(Data2)
+
+fviz_nbclust(Data2[,2:4], kmeans, method = "wss") 
+
+Data2_km <- Data2[2:4] 
+km_Data2 <- kmeans(Data2[,2:4], 4) 
+attributes(km_Data2)
+km_Data2$cluster
+km_Data2$centers 
+Data2_km$Class <- km_Data2$cluster 
+```
+
+```{r, Data2}
+#Use hierarchical clustering methods to generate clusters
+Data2 <- na.omit(Data2)
+Data2_hr <- Data2[1:3]
+Data2_hr_dist <- dist(Data2_hr,method= "euclidean") 
+
+Data2_hr_clust <- hclust(Data2_hr_dist, method = "complete") 
+
+
+plot(Data2_hr_clust, cex =0.5)
+rect.hclust(Data2_hr_clust, k=4, border = 2:7) 
+Data2_km$Hr_Data2_clusters <- cutree(Data2_hr_clust, k=4)
+```
+
+```{r, Data2}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data2$Class,Data2_km$Class,method = "jaccard_index")
+```
+
+```{r, Data2}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data2_Plot_True <- plot_ly(Data2,x=~X,y=~Y,z=~C, color = ~as.factor(Class))
+
+Data2_Plot_True
+```
+
+```{r, Data2}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data2_Plot_km <- plot_ly(Data2,x=~X,y=~Y,z=~C,type = "scatter3d", color = ~as.factor(km_Data2$cluster))
+Data2_Plot_km <- Data2_Plot_km %>% add_markers()
+
+Data2_Plot_km
+```
+
+```{r, Data2}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data2_clusters <- cutree(Data2_hr_clust, k=4)
+Data2_Plot_hr <- plot_ly(Data2_hr,x=~X,y=~Y,z=~C,type = "scatter3d", color = ~as.factor(Hr_Data2_clusters))
+
+Data2_Plot_hr
+```
+
+
+
+
+
+```{r, Data3}
+#Use K-means clustering methods to generate clusters
+Data3 <- na.omit(Data3)
+
+fviz_nbclust(Data3[,2:4], kmeans, method = "gap_stat") 
+
+Data3_km <- Data3[2:4] 
+km_Data3 <- kmeans(Data3[,2:4], 4) 
+attributes(km_Data3)
+km_Data3$cluster
+km_Data3$centers 
+Data3_km$Class <- km_Data3$cluster 
+```
+
+```{r, Data3}
+#Use hierarchical clustering methods to generate clusters
+Data3 <- na.omit(Data3)
+Data3_hr <- Data3[2:4]
+Data3_hr_dist <- dist(Data3_hr,method= "euclidean") 
+
+Data3_hr_clust <- hclust(Data3_hr_dist, method = "complete") 
+
+
+plot(Data3_hr_clust, cex =0.5)
+rect.hclust(Data3_hr_clust, k=4, border = 2:7)
+Data3_km$Hr_Data3_clusters <- cutree(Data3_hr_clust, k=4)
+```
+
+```{r, Data3}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data3$Class,Data3_km$Hr_Data3_clusters,method = "rand_index")
+```
+
+```{r, Data3}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data3_Plot_True <- plot_ly(Data3,x=~X1,y=~X2,z=~X3, color = ~as.factor(Class))
+
+Data3_Plot_True
+```
+
+```{r, Data3}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data3_Plot_km <- plot_ly(Data3,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(km_Data3$cluster))
+Data3_Plot_km <- Data3_Plot_km %>% add_markers()
+
+Data3_Plot_km
+```
+
+```{r, Data3}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data3_clusters <- cutree(Data3_hr_clust, k=4)
+Data3_Plot_hr <- plot_ly(Data3_hr,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(Hr_Data3_clusters))
+
+Data3_Plot_hr
+```
+
+
+
+
+
+```{r, Data4}
+#Use K-means clustering methods to generate clusters
+Data4 <- na.omit(Data4)
+
+fviz_nbclust(Data4[,2:4], kmeans, method = "silhouette") 
+
+Data4_km <- Data4[2:4] 
+km_Data4 <- kmeans(Data4[,2:4], 2) 
+attributes(km_Data4)
+km_Data4$cluster
+km_Data4$centers 
+Data4_km$Class <- km_Data4$cluster 
+```
+
+```{r, Data4}
+#Use hierarchical clustering methods to generate clusters
+Data4 <- na.omit(Data4)
+Data4_hr <- Data4[2:4]
+Data4_hr_dist <- dist(Data4_hr,method= "euclidean") 
+
+Data4_hr_clust <- hclust(Data4_hr_dist, method = "centroid") 
+
+
+plot(Data4_hr_clust, cex =0.5)
+rect.hclust(Data4_hr_clust, k=2, border = 2:7) 
+Data4_km$Hr_Data4_clusters <- cutree(Data4_hr_clust, k=2)
+```
+
+```{r, Data4}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data4$Class,Data4_km$Hr_Data4_clusters,method = "jaccard_index")
+```
+
+```{r, Data4}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data4_Plot_True <- plot_ly(Data4,x=~X1,y=~X2,z=~X3, color = ~as.factor(Class))
+
+Data4_Plot_True
+```
+
+```{r, Data4}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data4_Plot_km <- plot_ly(Data4,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(km_Data4$cluster))
+Data4_Plot_km <- Data4_Plot_km %>% add_markers()
+
+Data4_Plot_km
+```
+
+```{r, Data4}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data4_clusters <- cutree(Data4_hr_clust, k=2)
+Data4_Plot_hr <- plot_ly(Data4_hr,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(Hr_Data4_clusters))
+
+Data4_Plot_hr
+```
+
+
+
+
+```{r, Data5}
+#Use K-means clustering methods to generate clusters
+Data5 <- na.omit(Data5)
+
+fviz_nbclust(Data5[,2:4], kmeans, method = "wss") 
+
+Data5_km <- Data5[2:4] 
+km_Data5 <- kmeans(Data5[,2:4], 2) 
+attributes(km_Data5)
+km_Data5$cluster
+km_Data5$centers 
+Data5_km$Class <- km_Data5$cluster 
+```
+
+```{r, Data5}
+#Use hierarchical clustering methods to generate clusters
+Data5 <- na.omit(Data5)
+Data5_hr <- Data5[2:4]
+Data5_hr_dist <- dist(Data5_hr,method= "euclidean") 
+
+Data5_hr_clust <- hclust(Data5_hr_dist, method = "complete") 
+
+
+plot(Data5_hr_clust, cex =0.5)
+rect.hclust(Data5_hr_clust, k=2, border = 2:5) 
+Data5_km$Hr_Data5_clusters <- cutree(Data5_hr_clust, k=2)
+```
+
+```{r, Data5}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data5$Class,Data5_km$Hr_Data5_clusters,method = "rand_index")
+```
+
+```{r, Data5}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data5_Plot_True <- plot_ly(Data5,x=~X1,y=~X2,z=~X3, color = ~as.factor(Class))
+
+Data5_Plot_True
+```
+
+```{r, Data5}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data5_Plot_km <- plot_ly(Data5,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(km_Data5$cluster))
+Data5_Plot_km <- Data5_Plot_km %>% add_markers()
+
+Data5_Plot_km
+```
+
+```{r, Data5}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data5_clusters <- cutree(Data5_hr_clust, k=2)
+Data5_Plot_hr <- plot_ly(Data5_hr,x=~X1,y=~X2,z=~X3,type = "scatter3d", color = ~as.factor(Hr_Data5_clusters))
+
+Data5_Plot_hr
+```
+
+
+
+
+
+```{r, Data6}
+#Use K-means clustering methods to generate clusters
+Data6 <- na.omit(Data6)
+
+fviz_nbclust(Data6[,2:3], kmeans, method = "wss") 
+
+Data6_km <- Data6[2:3] 
+km_Data6 <- kmeans(Data6[,2:3], 3) 
+attributes(km_Data6)
+km_Data6$cluster
+km_Data6$centers 
+Data6_km$Class <- km_Data6$cluster 
+```
+
+```{r, Data6}
+#Use hierarchical clustering methods to generate clusters
+Data6 <- na.omit(Data6)
+Data6_hr <- Data6[2:3]
+Data6_hr_dist <- dist(Data6_hr,method= "euclidean") 
+
+Data6_hr_clust <- hclust(Data6_hr_dist, method = "complete") 
+
+
+plot(Data6_hr_clust, cex =0.5)
+rect.hclust(Data6_hr_clust, k=3, border = 2:7) 
+Data6_km$Hr_Data6_clusters <- cutree(Data6_hr_clust, k=3)
+```
+
+```{r, Data6}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data6$Class,Data6_km$Class,method = "jaccard_index")
+```
+
+```{r, Data6}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data6_Plot_True <- plot_ly(Data6,x=~X1,y=~X2, color = ~as.factor(Class))
+
+Data6_Plot_True
+```
+
+```{r, Data6}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data6_Plot_km <- plot_ly(Data6,x=~X1,y=~X2, color = ~as.factor(km_Data6$cluster))
+Data6_Plot_km <- Data6_Plot_km %>% add_markers()
+
+Data6_Plot_km
+```
+
+```{r, Data6}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data6_clusters <- cutree(Data6_hr_clust, k=3)
+Data6_Plot_hr <- plot_ly(Data6_hr,x=~X1,y=~X2, color = ~as.factor(Hr_Data6_clusters))
+
+Data6_Plot_hr
+```
+
+
+
+```{r, Data7}
+#Use K-means clustering methods to generate clusters
+Data7 <- na.omit(Data7)
+
+fviz_nbclust(Data7[,2:3], kmeans, method = "wss") 
+
+Data7_km <- Data7[2:3] 
+km_Data7 <- kmeans(Data7[,2:3], 6) 
+attributes(km_Data7)
+km_Data7$cluster
+km_Data7$centers 
+Data7_km$Class <- km_Data7$cluster 
+```
+
+```{r, Data7}
+#Use hierarchical clustering methods to generate clusters
+Data7 <- na.omit(Data7)
+Data7_hr <- Data7[2:3]
+Data7_hr_dist <- dist(Data7_hr,method= "euclidean") 
+
+Data7_hr_clust <- hclust(Data7_hr_dist, method = "complete") 
+
+
+plot(Data7_hr_clust, cex =0.5)
+rect.hclust(Data7_hr_clust, k=6, border = 2:7) 
+Data7_km$Hr_Data7_clusters <- cutree(Data7_hr_clust, k=6)
+```
+
+```{r, Data7}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data7$Class,Data7_km$Class,method = "rand_index")
+```
+
+```{r, Data7}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data7_Plot_True <- plot_ly(Data7,x=~X1,y=~X2, color = ~as.factor(Class))
+
+Data7_Plot_True
+```
+
+```{r, Data7}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data7_Plot_km <- plot_ly(Data7,x=~X1,y=~X2, color = ~as.factor(km_Data7$cluster))
+Data7_Plot_km <- Data7_Plot_km %>% add_markers()
+
+Data7_Plot_km
+```
+
+```{r, Data7}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data7_clusters <- cutree(Data7_hr_clust, k=6)
+Data7_Plot_hr <- plot_ly(Data7_hr,x=~X1,y=~X2, color = ~as.factor(Hr_Data7_clusters))
+
+Data7_Plot_hr
+```
+
+
+
+
+
+```{r, Data8}
+#Use K-means clustering methods to generate clusters
+
+fviz_nbclust(Data8[,2:4], kmeans, method = "silhouette") 
+
+Data8_km <- Data8[2:4] 
+km_Data8 <- kmeans(Data8[,2:4], 6) 
+attributes(km_Data8)
+km_Data8$cluster
+km_Data8$centers 
+Data8_km$Class <- km_Data8$cluster 
+```
+
+```{r, Data8}
+#Use hierarchical clustering methods to generate clusters
+
+Data8_hr <- Data8[2:4]
+Data8_hr_dist <- dist(Data8_hr,method= "euclidean") 
+
+Data8_hr_clust <- hclust(Data8_hr_dist, method = "complete") 
+
+
+plot(Data8_hr_clust, cex =0.5)
+rect.hclust(Data8_hr_clust, k=6, border = 2:7)
+Data8_km$Hr_Data8_clusters <- cutree(Data8_hr_clust, k=6)
+```
+
+```{r, Data8}
+#Evaluate the performance of the clustering algorithm using external validation metrics
+external_validation(Data8$Class,Data8_km$Hr_Data8_clusters,method = "rand_index")
+```
+
+```{r, Data8}
+#Plot (2D or 3D) the data points for each dataset and color them according to the original class
+Data8_Plot_True <- plot_ly(Data8,x=~X1,y=~X2,z=~X3, color = ~as.factor(Class))
+
+Data8_Plot_True
+```
+
+```{r, Data8}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#kmeans
+Data8_Plot_km <- plot_ly(Data8,x=~X1,y=~X2,z=~X3, color = ~as.factor(km_Data8$cluster))
+Data8_Plot_km <- Data8_Plot_km %>% add_markers()
+
+Data8_Plot_km
+```
+
+```{r, Data8}
+#Plot (2D or 3D) the data points for each dataset and color them according to the class allocated by the clustering algorithm
+
+#Hierarchical
+Hr_Data8_clusters <- cutree(Data8_hr_clust, k=6)
+Data8_Plot_hr <- plot_ly(Data8_hr,x=~X1,y=~X2,z=~X3, color = ~as.factor(Hr_Data8_clusters))
+
+Data8_Plot_hr
+```

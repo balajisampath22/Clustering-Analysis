@@ -1,0 +1,140 @@
+---
+title: "IE 5374 - Sec 1 - Group 14 - Project 1 - Task 2"
+output: html_document
+---
+
+```{r, Libraries}
+library(plotly)
+library(factoextra)
+library(ggplot2)
+library(ClusterR)
+library(dplyr)
+library(clValid)
+library(cluster)
+library(fpc)
+```
+
+```{r, Task 2: Clean data set to omit null sets}
+World_Indicators 
+WI <- select(World_Indicators,-"Energy Usage",-"Lending Interest") #remove following columns
+
+colnames(WI)
+A <- select(World_Indicators, "Birth Rate","Health Exp % GDP","Infant Mortality Rate","Internet Usage","Life Expectancy Female","Life Expectancy Male","Mobile Phone Usage","Population 0-14","Population 15-64","Population 65+","Population Urban","Country") #select metrics
+
+B <- na.omit(A) #omit null value
+
+WI_scale <- scale(B[1:11]) #scale values of all columns
+
+WI_km <- data.frame(WI_scale)
+
+df_WI <- data.frame(WI_scale)
+df_WI$Country <- B$Country
+```
+
+```{r}
+#Use K-means clustering methods to group similar countries together
+
+fviz_nbclust(WI_scale, kmeans, method = "wss") #determine optimal number of clusters and plot of the number of clusters vs. the total within sum of square
+
+km_WI <- kmeans(WI_km, 2) #specify number of cluster K
+attributes(km_WI) #Kmeans attributes
+km_WI$cluster #cluster values
+km_WI$centers #centroids
+
+WI_km$class <- km_WI$cluster #kmeans cluster analysis
+```
+The Dunn Index is the ratio of the smallest distance between observations not in the same cluster to the largest intra-cluster distance. The Dunn Index has a value between zero and infinity.
+```{r}
+#Internal validation for Kmeans clustering
+# Dunn Index
+km <- kmeans(WI_km,2)
+dunn(clusters = km_WI$cluster, Data = WI_km)
+```
+
+The silhouette value is a measure of how similar an object is to its own cluster compared to other clusters.
+```{r}
+#Internal validation for Kmeans clustering
+# Silhouette Index
+dis = dist(WI_km)^2
+km <- kmeans(WI_km,2)
+sil<- silhouette(km_WI$cluster, dis)
+#windows() 
+plot(sil)
+```
+
+```{r}
+#Use hierarchical clustering methods to group similar countries together
+
+WI_hr <- df_WI[1:11]
+
+#distance
+WI_hr_dist <- dist(WI_hr,method= "euclidean")
+
+#Hierarchical
+
+WI_hr_clust <- hclust(WI_hr_dist, method = "complete")
+
+#Dendogram
+plot(WI_hr_clust, cex =0.5)
+rect.hclust(WI_hr_clust, k=2, border = 2:7)
+
+Hr_WI_clusters <- cutree(WI_hr_clust, k=2)
+
+WI_hr$class <- Hr_WI_clusters
+
+WI_km$Hr_WI_clusters <- cutree(WI_hr_clust, k=2)
+```
+
+```{r}
+#Internal validation for hierarchical clustering
+# Dunn Index
+
+dunn(clusters = Hr_WI_clusters, Data =WI_hr )
+```
+
+```{r}
+#Internal validation for hierarchical clustering
+# Silhouette Index
+
+dis = dist(WI_hr)^2
+sil<- silhouette(Hr_WI_clusters, dis)
+plot(sil)
+```
+
+```{r}
+#Report the best clustering solution. Give a detailed list of all the groups and the countries included within the groups
+
+df_WI$Class <- WI_km$Hr_WI_clusters
+
+df_WI %>%
+  filter(Class==1) %>%
+  select(Country,Class)
+
+df_WI %>%
+  filter(Class==2) %>%
+  select(Country,Class)
+
+
+#Note: Best clustering solution for the dataset is hierarchical clustering. Below are the list of all the groups and the countries included.
+```
+
+```{r}
+#Generate three different scatter plots of your choice and color the data points according to the group. Example: “Life expectancy vs GDP”, “Infant Mortality vs GDP”, etc
+
+#Life expectancy male vs female
+
+WI_Plot_km_1 <- plot_ly(WI_km,x=WI_km$Life.Expectancy.Female,y=WI_km$Life.Expectancy.Male, color = ~as.factor(WI_km$class))
+WI_Plot_km_1
+```
+
+```{r}
+#Birth_Rate vs Population
+WI_Plot_hr_1 <- plot_ly(WI_hr,x=WI_hr$Birth.Rate,y=WI_hr$Population.0.14, color = ~as.factor(Hr_WI_clusters))
+WI_Plot_hr_1
+```
+
+```{r}
+#Internet_Usage vs Mobile_phone_Usage
+WI_Plot_hr_2 <- plot_ly(WI_hr,x=WI_hr$Internet.Usage,y=WI_hr$Mobile.Phone.Usage, color = ~as.factor(Hr_WI_clusters))
+WI_Plot_hr_2
+```
